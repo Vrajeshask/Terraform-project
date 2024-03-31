@@ -2,25 +2,63 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "ncpl_group" {
+resource "azurerm_resource_group" "ncpl_rg" {
   name     = var.resource_group_name
   location = var.location
 }
 
-resource "azurerm_app_service_plan" "app_service_plan" {
-  name                = var.azurerm_app_service_plan
-  location            = azurerm_resource_group.ncpl_group.location
-  resource_group_name = azurerm_resource_group.ncpl_group.name
+# Create a virtual network within the resource group
+resource "azurerm_virtual_network" "ncpl-vn" {
+  name                = var.vn_name
+  resource_group_name = azurerm_resource_group.ncpl-rg.name
+  location            = azurerm_resource_group.ncpl-rg.location
+  address_space       = ["10.0.0.0/16"]
+}
 
-  sku {
-    tier = var.sku
-    size = var.size
+
+resource "azurerm_subnet" "ncpl-subnet" {
+  name                 = "internal"
+  resource_group_name  = azurerm_resource_group.ncpl-rg.name
+  virtual_network_name = azurerm_virtual_network.ncpl-vn.name
+  address_prefixes     = ["10.0.2.0/24"]
+}
+
+resource "azurerm_network_interface" "ncpl-nic" {
+  name                = var.nic_name
+  location            = azurerm_resource_group.ncpl-rg.location
+  resource_group_name = azurerm_resource_group.ncpl-rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.ncpl-subnet.id
+    private_ip_address_allocation = "Dynamic"
   }
 }
 
-resource "azurerm_app_service" "ncpl_app_service" {
-  name                = var.ncpl_app_service
-  location            = azurerm_resource_group.ncpl_group.location
-  resource_group_name = azurerm_resource_group.ncpl_group.name
-  app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
+resource "azurerm_linux_virtual_machine" "ncpl-vm" {
+  name                = var.vm_name
+  resource_group_name = azurerm_resource_group.ncpl-rg.name
+  location            = azurerm_resource_group.ncpl-rg.location
+  size                = "Standard_F2"
+  admin_username      = "adminuser"
+  network_interface_ids = [
+    azurerm_network_interface.ncpl-nic.id,
+  ]
+
+  admin_ssh_key {
+    username   = "adminuser"
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
 }
