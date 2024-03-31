@@ -1,6 +1,0 @@
-resource_group_name = "ncpl_rg_new"
-location = "eastus"
-azurerm_app_service_plan = "ncpl_plan"
-sku = "Standard"
-size = "S1"
-ncpl_app_service = "ncplapp"
