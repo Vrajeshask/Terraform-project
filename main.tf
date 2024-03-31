@@ -2,7 +2,7 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "ncpl_rg" {
+resource "azurerm_resource_group" "ncpl-rg" {
   name     = var.resource_group_name
   location = var.location
 }
