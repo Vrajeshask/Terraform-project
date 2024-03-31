@@ -19,3 +19,7 @@ variable "vm_name" {
 }
 
 
+variable "vn_name" {
+    description = " name of Virtual network"
+    type = string
+}
