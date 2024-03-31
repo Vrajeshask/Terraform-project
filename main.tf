@@ -40,31 +40,23 @@ resource "azurerm_linux_virtual_machine" "ncpl-vm" {
   resource_group_name = azurerm_resource_group.ncpl-rg.name
   location            = azurerm_resource_group.ncpl-rg.location
   size                = "Standard_F2"
+  admin_username      = "adminuser"  # Replace with your desired admin username
+  disable_password_authentication = false
+  admin_password      = "MyStrongPassword123!"  # Replace with your desired admin password
 
-  # Uncomment this line to delete the data disks automatically when deleting the VM
-  # delete_data_disks_on_termination = true
+  network_interface_ids = [
+    azurerm_network_interface.ncpl-nic.id,
+  ]
 
-  storage_image_reference {
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
     sku       = "22_04-lts"
     version   = "latest"
-  }
-  storage_os_disk {
-    name              = "myosdisk1"
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"
-  }
-  os_profile {
-    computer_name  = "hostname"
-    admin_username = "testadmin"
-    admin_password = "Password1234!"
-  }
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
-  tags = {
-    environment = "staging"
   }
 }
