@@ -53,8 +53,6 @@ resource "azurerm_linux_virtual_machine" "ncpl-vm" {
     azurerm_network_interface.ncpl-nic.id,
   ]
 
-  
-
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
