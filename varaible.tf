@@ -8,22 +8,14 @@ variable "location" {
     type = string
 }
 
-variable "azurerm_app_service_plan" {
-  description = "Name of the app service"
+variable "nic_name" {
+  description = "Name of the network interface "
   type = string
 }
 
-variable "sku" {
-    description = " type of tier"
+variable "vm_name" {
+    description = " name of vm"
     type = string
 }
 
-variable "size" {
-    description = "size of tier"
-    type = string
-}
 
-variable "ncpl_app_service" {
-  description = "name of app service"
-  type = string
-  }
